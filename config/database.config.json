@@ -1,0 +1,11 @@
+{
+    "pool": {
+        "waitForConnections": true,
+        "connectionLimit": 10,
+        "queueLimit": 0
+    },
+    "tables": {
+        "synchronization": "synchronization",
+        "synchronization_token": "synchronization_token"
+    }
+}

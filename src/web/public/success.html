@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Origin RolePlay - Synchronisation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0a url('https://i.imgur.com/w6mPPTP.png') center/cover no-repeat fixed;
+            min-height: 100vh;
+            max-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1;
+        }
+
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(0, 255, 136, 0.3);
+            border-radius: 50%;
+            pointer-events: none;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.2);
+            animation: fall 20s infinite ease-in-out;
+            top: -50px;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(0) translateX(0) scale(1);
+                opacity: 0;
+            }
+            5% {
+                opacity: 0.3;
+            }
+            95% {
+                opacity: 0.3;
+            }
+            100% {
+                transform: translateY(100vh) translateX(var(--float-x)) scale(1.2);
+                opacity: 0;
+            }
+        }
+
+        .title-wrapper {
+            z-index: 10;
+            padding: 40px 20px 20px 20px;
+            text-align: center;
+            animation: fadeInDown 0.8s ease-out;
+            width: 100%;
+            flex-shrink: 0;
+        }
+
+        h1 {
+            font-size: 4.5rem;
+            font-weight: 700;
+            color: #ffffff;
+            text-transform: uppercase;
+            letter-spacing: 0.3em;
+            text-shadow: 0 2px 30px rgba(0, 0, 0, 0.9);
+            line-height: 1.2;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .container {
+            text-align: center;
+            z-index: 10;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            width: 100%;
+        }
+
+        .status-wrapper {
+            padding: 40px 50px;
+            background: rgba(10, 10, 10, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5), inset 0 0 50px rgba(0, 255, 136, 0.03);
+            position: relative;
+            animation: fadeInUp 0.8s ease-out 0.4s forwards;
+            opacity: 0;
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .status-icon {
+            width: 70px;
+            height: 70px;
+            margin: 0 auto 25px;
+            border-radius: 50%;
+            border: 3px solid #00ff88;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 255, 136, 0.1);
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
+            flex-shrink: 0;
+        }
+
+        .status-icon::before {
+            content: '✓';
+            font-size: 2.5rem;
+            color: #00ff88;
+            font-weight: bold;
+        }
+
+        .status-text {
+            font-size: 1.8rem;
+            color: #00ff88;
+            font-weight: 600;
+            letter-spacing: 0.3em;
+            text-shadow: 0 2px 20px rgba(0, 255, 136, 0.5);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        .success-message {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 300;
+            letter-spacing: 0.1em;
+            line-height: 1.5;
+            text-align: center;
+        }
+
+        .divider {
+            width: 60px;
+            height: 2px;
+            background: #00ff88;
+            margin: 20px auto;
+            opacity: 0.5;
+        }
+
+        .timestamp {
+            z-index: 10;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.85rem;
+            letter-spacing: 0.1em;
+            font-weight: 300;
+            animation: fadeIn 0.8s ease-out 1s forwards;
+            opacity: 0;
+            text-align: center;
+            padding: 20px 20px 40px 20px;
+            width: 100%;
+            flex-shrink: 0;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        .corner-accent {
+            position: absolute;
+            width: 2px;
+            height: 40px;
+            background: #00ff88;
+        }
+
+        .corner-accent.top-left {
+            top: 0;
+            left: 0;
+        }
+
+        .corner-accent.top-left::before {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 2px;
+            background: #00ff88;
+            top: 0;
+            left: 0;
+        }
+
+        .corner-accent.bottom-right {
+            bottom: 0;
+            right: 0;
+        }
+
+        .corner-accent.bottom-right::before {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 2px;
+            background: #00ff88;
+            bottom: 0;
+            right: 0;
+        }
+
+        @media (max-width: 1024px) {
+            .title-wrapper {
+                padding: 35px 20px 18px 20px;
+            }
+
+            h1 {
+                font-size: 3.2rem;
+                letter-spacing: 0.25em;
+            }
+
+            .status-text {
+                font-size: 1.6rem;
+                letter-spacing: 0.25em;
+            }
+
+            .container {
+                padding: 18px;
+            }
+
+            .timestamp {
+                padding: 18px 20px 35px 20px;
+            }
+
+            .status-icon {
+                width: 65px;
+                height: 65px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .title-wrapper {
+                padding: 30px 15px 15px 15px;
+            }
+
+            h1 {
+                font-size: 2.5rem;
+                letter-spacing: 0.2em;
+            }
+
+            .status-text {
+                font-size: 1.4rem;
+                letter-spacing: 0.2em;
+            }
+
+            .success-message {
+                font-size: 0.95rem;
+            }
+
+            .status-wrapper {
+                padding: 30px 25px;
+            }
+
+            .container {
+                padding: 15px;
+            }
+
+            .timestamp {
+                font-size: 0.75rem;
+                padding: 15px 15px 30px 15px;
+            }
+
+            .status-icon {
+                width: 60px;
+                height: 60px;
+                margin-bottom: 20px;
+            }
+
+            .status-icon::before {
+                font-size: 2.2rem;
+            }
+
+            .divider {
+                margin: 18px auto;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .title-wrapper {
+                padding: 20px 10px 10px 10px;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+                letter-spacing: 0.15em;
+            }
+
+            .status-text {
+                font-size: 1.1rem;
+                letter-spacing: 0.15em;
+            }
+
+            .status-wrapper {
+                padding: 25px 20px;
+            }
+
+            .container {
+                padding: 12px;
+            }
+
+            .success-message {
+                font-size: 0.85rem;
+                line-height: 1.4;
+            }
+
+            .timestamp {
+                font-size: 0.65rem;
+                padding: 12px 10px 20px 10px;
+                line-height: 1.3;
+            }
+
+            .status-icon {
+                width: 50px;
+                height: 50px;
+                margin-bottom: 15px;
+            }
+
+            .status-icon::before {
+                font-size: 1.8rem;
+            }
+
+            .divider {
+                margin: 15px auto;
+                width: 50px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .title-wrapper {
+                padding: 15px 10px 8px 10px;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+                letter-spacing: 0.1em;
+            }
+
+            .status-text {
+                font-size: 1rem;
+                letter-spacing: 0.1em;
+            }
+
+            .status-wrapper {
+                padding: 20px 15px;
+            }
+
+            .success-message {
+                font-size: 0.8rem;
+            }
+
+            .timestamp {
+                font-size: 0.6rem;
+                padding: 10px 10px 15px 10px;
+            }
+
+            .status-icon {
+                width: 45px;
+                height: 45px;
+            }
+
+            .status-icon::before {
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-height: 700px) {
+            .title-wrapper {
+                padding: 25px 20px 12px 20px;
+            }
+
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .container {
+                padding: 12px 20px;
+            }
+
+            .status-wrapper {
+                padding: 25px 20px;
+            }
+
+            .timestamp {
+                padding: 12px 20px 25px 20px;
+            }
+
+            .status-icon {
+                width: 55px;
+                height: 55px;
+                margin-bottom: 15px;
+            }
+
+            .status-icon::before {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-height: 600px) {
+            .title-wrapper {
+                padding: 20px 15px 10px 15px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .status-text {
+                font-size: 1.3rem;
+            }
+
+            .container {
+                padding: 10px 15px;
+            }
+
+            .status-wrapper {
+                padding: 20px 15px;
+            }
+
+            .timestamp {
+                padding: 10px 15px 20px 15px;
+                font-size: 0.7rem;
+            }
+
+            .status-icon {
+                width: 50px;
+                height: 50px;
+                margin-bottom: 12px;
+            }
+
+            .status-icon::before {
+                font-size: 1.8rem;
+            }
+
+            .divider {
+                margin: 12px auto;
+            }
+        }
+
+        @media (max-height: 500px) {
+            .title-wrapper {
+                padding: 15px 10px 8px 10px;
+            }
+
+            h1 {
+                font-size: 1.6rem;
+            }
+
+            .status-text {
+                font-size: 1.1rem;
+            }
+
+            .container {
+                padding: 8px 15px;
+            }
+
+            .status-wrapper {
+                padding: 15px 12px;
+            }
+
+            .timestamp {
+                padding: 8px 10px 15px 10px;
+                font-size: 0.65rem;
+            }
+
+            .status-icon {
+                width: 40px;
+                height: 40px;
+                margin-bottom: 10px;
+            }
+
+            .status-icon::before {
+                font-size: 1.5rem;
+            }
+
+            .success-message {
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="particles" id="particles"></div>
+
+    <div class="title-wrapper">
+        <h1>SYNCHRONISATION</h1>
+    </div>
+
+    <div class="container">
+        <div class="status-wrapper">
+            <div class="corner-accent top-left"></div>
+            <div class="corner-accent bottom-right"></div>
+
+            <div class="status-icon"></div>
+
+            <div class="status-text">TERMINÉE</div>
+            <div class="divider"></div>
+            <div class="success-message">
+                Vos données ont été synchronisées avec succès.<br>
+                Vous avez désormais l'accès au serveur Discord.
+            </div>
+        </div>
+    </div>
+
+    <div class="timestamp">
+        ORIGIN ROLEPLAY © 2025 • All Rights Reserved
+    </div>
+
+    <script>
+        const particlesContainer = document.getElementById('particles');
+        const numberOfParticles = 40;
+
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+
+            const size = Math.random() * 6 + 6;
+            particle.style.width = size + 'px';
+            particle.style.height = size + 'px';
+            particle.style.left = Math.random() * 100 + '%';
+
+            const floatX = (Math.random() - 0.5) * 200;
+            particle.style.setProperty('--float-x', floatX + 'px');
+
+            particle.style.animationDuration = (Math.random() * 10 + 15) + 's';
+            particle.style.animationDelay = Math.random() * 5 + 's';
+
+            particlesContainer.appendChild(particle);
+
+            setTimeout(() => {
+                particle.remove();
+                createParticle();
+            }, (parseFloat(particle.style.animationDuration) + parseFloat(particle.style.animationDelay)) * 1000);
+        }
+
+        for (let i = 0; i < numberOfParticles; i++) {
+            createParticle();
+        }
+    </script>
+</body>
+
+</html>
